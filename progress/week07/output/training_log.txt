@@ -1,0 +1,82 @@
+2025-12-07 18:11:51,097 - INFO - ============================================================
+2025-12-07 18:11:51,097 - INFO - PRE-RELEASE MOVIE SUCCESS PREDICTION MODEL
+2025-12-07 18:11:51,097 - INFO - ============================================================
+2025-12-07 18:11:51,097 - INFO - Đang load data từ: /home/ktmjn/Documents/Do_An/data/clean_movies_features.csv
+2025-12-07 18:11:51,128 - INFO - Loaded 1020 phim với 65 cột
+2025-12-07 18:11:51,129 - INFO - 
+Phân bố label:
+2025-12-07 18:11:51,130 - INFO -   Thành công: 514 (50.4%)
+2025-12-07 18:11:51,130 - INFO -   Thất bại: 506 (49.6%)
+2025-12-07 18:11:51,130 - INFO - Đang chọn Pre-Release features...
+2025-12-07 18:11:51,130 - WARNING - Features không có trong dataset: ['budget', 'runtime']
+2025-12-07 18:11:51,130 - INFO - Sử dụng 37 features
+2025-12-07 18:11:51,133 - INFO - Bắt đầu train model...
+2025-12-07 18:11:51,142 - INFO - Train set: 816, Test set: 204
+2025-12-07 18:11:51,388 - INFO - Model đã train xong!
+2025-12-07 18:11:51,445 - INFO - ==================================================
+2025-12-07 18:11:51,445 - INFO - EVALUATION METRICS
+2025-12-07 18:11:51,445 - INFO - ==================================================
+2025-12-07 18:11:51,445 - INFO - Accuracy:  0.6765 (67.65%)
+2025-12-07 18:11:51,445 - INFO - Precision: 0.6796
+2025-12-07 18:11:51,446 - INFO - Recall:    0.6796
+2025-12-07 18:11:51,446 - INFO - F1-Score:  0.6796
+2025-12-07 18:11:51,446 - INFO - 
+Classification Report:
+2025-12-07 18:11:51,452 - INFO - 
+              precision    recall  f1-score   support
+
+    Thất bại       0.67      0.67      0.67       101
+  Thành công       0.68      0.68      0.68       103
+
+    accuracy                           0.68       204
+   macro avg       0.68      0.68      0.68       204
+weighted avg       0.68      0.68      0.68       204
+
+2025-12-07 18:11:51,454 - INFO - 
+Confusion Matrix:
+2025-12-07 18:11:51,454 - INFO -   TN=68, FP=33
+2025-12-07 18:11:51,454 - INFO -   FN=33, TP=70
+2025-12-07 18:11:51,454 - INFO - 
+==================================================
+2025-12-07 18:11:51,454 - INFO - 5-FOLD CROSS VALIDATION
+2025-12-07 18:11:51,454 - INFO - ==================================================
+2025-12-07 18:11:52,520 - INFO - CV Scores: [0.67647059 0.66666667 0.68627451 0.72058824 0.71568627]
+2025-12-07 18:11:52,521 - INFO - CV Mean:   0.6931 (+/- 0.0428)
+2025-12-07 18:11:52,521 - INFO - 
+==================================================
+2025-12-07 18:11:52,521 - INFO - FEATURE IMPORTANCE
+2025-12-07 18:11:52,521 - INFO - ==================================================
+2025-12-07 18:11:52,537 - INFO - 
+Top 15 Features quan trọng nhất:
+2025-12-07 18:11:52,537 - INFO -   runtime_hours: 15.15%
+2025-12-07 18:11:52,538 - INFO -   runtime_minutes: 12.64%
+2025-12-07 18:11:52,538 - INFO -   Budget_log: 11.31%
+2025-12-07 18:11:52,538 - INFO -   release_year: 8.15%
+2025-12-07 18:11:52,538 - INFO -   release_month: 6.66%
+2025-12-07 18:11:52,538 - INFO -   release_weekday: 3.77%
+2025-12-07 18:11:52,538 - INFO -   genre_Drama: 3.44%
+2025-12-07 18:11:52,539 - INFO -   cast_genre_interaction: 3.39%
+2025-12-07 18:11:52,539 - INFO -   genre_Animation: 3.17%
+2025-12-07 18:11:52,539 - INFO -   release_quarter: 2.75%
+2025-12-07 18:11:52,539 - INFO -   num_genres: 2.69%
+2025-12-07 18:11:52,539 - INFO -   genre_Horror: 2.14%
+2025-12-07 18:11:52,539 - INFO -   genre_Action: 1.96%
+2025-12-07 18:11:52,540 - INFO -   is_united_states_of_america: 1.76%
+2025-12-07 18:11:52,540 - INFO -   is_usa: 1.67%
+2025-12-07 18:11:52,544 - INFO - Feature importance saved to: /home/ktmjn/Documents/Do_An/progress/week07/output/feature_importance.csv
+2025-12-07 18:11:52,551 - INFO - 
+Model đã lưu tại: /home/ktmjn/Documents/Do_An/progress/week07/output/pre_release_rf_model.pkl
+2025-12-07 18:11:52,561 - INFO - 
+Model đã lưu tại: /home/ktmjn/Documents/Do_An/data/pkl/pre_release_rf_model.pkl
+2025-12-07 18:11:52,562 - INFO - 
+============================================================
+2025-12-07 18:11:52,562 - INFO - SUMMARY
+2025-12-07 18:11:52,562 - INFO - ============================================================
+2025-12-07 18:11:52,562 - INFO - ✅ Model type: Pre-Release Prediction
+2025-12-07 18:11:52,562 - INFO - ✅ Features used: 37
+2025-12-07 18:11:52,562 - INFO - ✅ Accuracy: 67.65%
+2025-12-07 18:11:52,562 - INFO - ✅ F1-Score: 67.96%
+2025-12-07 18:11:52,562 - INFO - ✅ CV Mean: 69.31%
+2025-12-07 18:11:52,562 - INFO - ✅ Output directory: /home/ktmjn/Documents/Do_An/progress/week07/output
+2025-12-07 18:11:52,562 - INFO - ✅ Log file: /home/ktmjn/Documents/Do_An/progress/week07/output/training_log.txt
+2025-12-07 18:11:52,562 - INFO - ============================================================
