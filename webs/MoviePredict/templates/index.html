@@ -70,13 +70,13 @@
                 <div class="glass-card input-card">
                     <form id="prediction-form">
                         <div class="form-header">
-                            <h3><i class="fas fa-search"></i> Nhập thông tin phim</h3>
+                            <h3><i class="fas fa-search"></i> Dự đoán trước phát hành</h3>
+                            <span class="badge-pre-release">PRE-RELEASE</span>
                         </div>
 
                         <div class="form-grid">
-                            <!-- Title -->
-                            <div class="form-group full-width">
-                                <label class="mono-label">TÊN DỰ ÁN (PROJECT TITLE)</label>
+                            <div class="form-group floating-group">
+                                <label class="mono-label">TÊN PHIM (TITLE)</label>
                                 <div class="input-wrapper">
                                     <i class="fas fa-heading"></i>
                                     <input type="text" id="title" name="title" placeholder="Nhập tên phim..." required>
@@ -92,28 +92,32 @@
                             </div>
 
                             <div class="form-group floating-group">
-                                <label class="mono-label">DOANH THU HIỆN TẠI (CURRENT REV)</label>
-                                <div class="input-wrapper">
-                                    <i class="fas fa-chart-line"></i>
-                                    <input type="number" id="revenue" name="revenue" required placeholder="0" min="0">
-                                </div>
-                            </div>
-
-                            <div class="form-group floating-group">
-                                <label class="mono-label">ĐIỂM ĐÁNH GIÁ (TMDB SCORE)</label>
-                                <div class="input-wrapper">
-                                    <i class="fas fa-star"></i>
-                                    <input type="number" id="vote_average" name="vote_average" step="0.1" min="0"
-                                        max="10" required placeholder="0.0">
-                                </div>
-                            </div>
-
-                            <div class="form-group floating-group">
                                 <label class="mono-label">THỜI LƯỢNG (RUNTIME)</label>
                                 <div class="input-wrapper">
                                     <i class="fas fa-clock"></i>
-                                    <input type="number" id="runtime" name="runtime" required placeholder="Phút"
-                                        min="0">
+                                    <input type="number" id="runtime" name="runtime" required placeholder="Phút" min="0"
+                                        value="120">
+                                </div>
+                            </div>
+
+                            <div class="form-group floating-group">
+                                <label class="mono-label">THÁNG PHÁT HÀNH</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-calendar"></i>
+                                    <select id="releaseMonth" name="releaseMonth">
+                                        <option value="1">Tháng 1</option>
+                                        <option value="2">Tháng 2</option>
+                                        <option value="3">Tháng 3</option>
+                                        <option value="4">Tháng 4</option>
+                                        <option value="5">Tháng 5</option>
+                                        <option value="6" selected>Tháng 6 (Mùa hè)</option>
+                                        <option value="7">Tháng 7 (Mùa hè)</option>
+                                        <option value="8">Tháng 8</option>
+                                        <option value="9">Tháng 9</option>
+                                        <option value="10">Tháng 10</option>
+                                        <option value="11">Tháng 11 (Holiday)</option>
+                                        <option value="12">Tháng 12 (Holiday)</option>
+                                    </select>
                                 </div>
                             </div>
 

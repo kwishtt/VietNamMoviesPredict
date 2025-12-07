@@ -374,12 +374,11 @@ const App = {
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
 
-      // Convert types
-      data.budget = parseFloat(data.budget);
-      data.revenue = parseFloat(data.revenue);
-      data.voteAverage = parseFloat(data.vote_average);
-      data.runtime = parseInt(data.runtime);
-      data.genres = data.genres ? data.genres.split(',') : [];
+      // Convert types for Pre-Release prediction
+      data.budget = parseFloat(data.budget) || 0;
+      data.runtime = parseInt(data.runtime) || 120;
+      data.releaseMonth = parseInt(data.releaseMonth) || 6;
+      data.genres = data.genres ? data.genres.split(',').filter(g => g.trim()) : [];
 
       // Call API
       const response = await fetch('/predict', {
@@ -396,7 +395,7 @@ const App = {
 
       // Initialize Simulation Mode with input data + prediction result
       const simulationData = {
-        ...data, // Original inputs (genres, etc.)
+        ...data,
         success_probability: result.prediction.success_probability
       };
       this.initSimulationMode(simulationData);
@@ -464,17 +463,21 @@ const App = {
       descEl.textContent = `Tiềm năng ở mức trung bình. Thành công phụ thuộc vào yếu tố thị trường.`;
     }
 
-    // Update Metrics Values
-    const roi = metrics.roi_category || metrics.predictedROI || 'N/A';
-    const risk = metrics.risk_level || metrics.riskLevel || 'N/A';
-    const revenue = metrics.estimated_revenue || metrics.predictedRevenue || 0;
+    // Update Metrics Values for Pre-Release
+    const estimatedRoi = metrics.estimated_roi || metrics.roi_category || 'N/A';
+    const riskScore = metrics.risk_score || metrics.risk_level || 'N/A';
+    const successScore = metrics.success_score || Math.round(prob * 100) || 0;
 
-    document.getElementById('roi-value').textContent = roi;
-    document.getElementById('risk-value').textContent = risk;
+    // Display ROI as multiplier or category
+    const roiDisplay = typeof estimatedRoi === 'number' ? `${estimatedRoi}x` : estimatedRoi;
+    document.getElementById('roi-value').textContent = roiDisplay;
 
-    // Format Revenue
-    const formattedRevenue = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(revenue);
-    document.getElementById('revenue-value').textContent = formattedRevenue;
+    // Display risk level
+    const riskDisplay = typeof riskScore === 'number' ? `${riskScore}%` : riskScore;
+    document.getElementById('risk-value').textContent = riskDisplay;
+
+    // Display success score instead of revenue (Pre-Release doesn't have revenue)
+    document.getElementById('revenue-value').textContent = `${successScore}%`;
 
     // Render Charts
     this.renderFeatureChart(data.feature_importance);
@@ -488,27 +491,39 @@ const App = {
       this.radarChartInstance.destroy();
     }
 
-    // Normalize data for chart (Scale 0-100)
-    // Benchmarks (Approximate values for a "Blockbuster")
+    // Pre-Release benchmarks (no revenue/vote_average)
     const benchmark = {
       budget: 150000000, // $150M
       runtime: 130,      // 130 mins
-      vote: 7.5,         // 7.5 stars
-      revenue: 400000000 // $400M
+      genres: 3,         // 3 genres  
+      releaseMonth: 6    // Summer release
     };
 
+    // Calculate scores for Pre-Release features
+    const budgetScore = Math.min((inputData.budget / benchmark.budget) * 100, 100);
+    const runtimeScore = Math.min((inputData.runtime / benchmark.runtime) * 100, 100);
+    const genreScore = Math.min(((inputData.genres?.length || 1) / benchmark.genres) * 100, 100);
+
+    // Release timing score (summer/holiday months get higher scores)
+    const releaseMonth = inputData.release_month || inputData.releaseMonth || 6;
+    const isGoodMonth = [6, 7, 11, 12].includes(releaseMonth);
+    const timingScore = isGoodMonth ? 90 : 60;
+
+    // Overall potential based on budget and genres
+    const potentialScore = (budgetScore * 0.5 + genreScore * 0.3 + timingScore * 0.2);
+
     const dataValues = [
-      Math.min((inputData.budget / benchmark.budget) * 100, 100),
-      Math.min((inputData.runtime / benchmark.runtime) * 100, 100),
-      Math.min((inputData.vote_average / benchmark.vote) * 100, 100),
-      Math.min((inputData.revenue / benchmark.revenue) * 100, 100),
-      Math.min((inputData.vote_average * 10) + 20, 100) // Quality Score proxy
+      budgetScore,
+      runtimeScore,
+      genreScore,
+      timingScore,
+      potentialScore
     ];
 
     this.radarChartInstance = new Chart(ctx, {
       type: 'radar',
       data: {
-        labels: ['Budget Power', 'Runtime Fit', 'Audience Rating', 'Revenue Potential', 'Quality Score'],
+        labels: ['Budget Power', 'Runtime Fit', 'Genre Diversity', 'Release Timing', 'Overall Potential'],
         datasets: [{
           label: 'Your Movie',
           data: dataValues,
@@ -520,7 +535,7 @@ const App = {
           pointHoverBorderColor: '#00E5FF'
         }, {
           label: 'Blockbuster Avg',
-          data: [80, 85, 90, 85, 90], // Ideal shape
+          data: [80, 85, 70, 90, 80], // Ideal shape
           backgroundColor: 'rgba(255, 215, 0, 0.1)',
           borderColor: '#FFD700',
           pointBackgroundColor: '#FFD700',
@@ -606,9 +621,24 @@ const App = {
       this.featureChart.destroy();
     }
 
-    // Process data
-    const labels = featureData.top_features.map(f => f.name);
-    const values = featureData.top_features.map(f => f.importance);
+    // Handle both formats: array directly or object with top_features
+    let features = [];
+    if (Array.isArray(featureData)) {
+      // New Pre-Release format: array of {feature, importance}
+      features = featureData;
+    } else if (featureData && featureData.top_features) {
+      // Old format: object with top_features
+      features = featureData.top_features;
+    }
+
+    if (!features || features.length === 0) {
+      console.warn('No feature data available');
+      return;
+    }
+
+    // Process data - handle both naming conventions
+    const labels = features.map(f => f.feature || f.name || 'Unknown');
+    const values = features.map(f => f.importance || 0);
 
     this.featureChart = new Chart(ctx, {
       type: 'bar',
@@ -659,11 +689,25 @@ const App = {
   },
 
   fillRandomData() {
+    // Pre-Release random data (no revenue or vote_average)
     document.getElementById('title').value = 'Project Alpha ' + Math.floor(Math.random() * 100);
-    document.getElementById('budget').value = Math.floor(Math.random() * 5000000) + 1000000;
-    document.getElementById('revenue').value = Math.floor(Math.random() * 10000000);
-    document.getElementById('vote_average').value = (Math.random() * 5 + 4).toFixed(1);
+    document.getElementById('budget').value = Math.floor(Math.random() * 50000000) + 1000000;
     document.getElementById('runtime').value = Math.floor(Math.random() * 60) + 90;
+    document.getElementById('releaseMonth').value = Math.floor(Math.random() * 12) + 1;
+
+    // Random genres
+    const allGenres = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Romance', 'Sci-Fi', 'Thriller'];
+    const numGenres = Math.floor(Math.random() * 3) + 1;
+    const selectedGenres = allGenres.sort(() => 0.5 - Math.random()).slice(0, numGenres);
+
+    // Update genre chips
+    document.querySelectorAll('.genre-chip').forEach(chip => {
+      chip.classList.remove('active');
+      if (selectedGenres.includes(chip.textContent)) {
+        chip.classList.add('active');
+      }
+    });
+    document.getElementById('genres').value = selectedGenres.join(',');
   }
 };
 
