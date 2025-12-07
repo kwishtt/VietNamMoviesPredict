@@ -34,6 +34,12 @@
     <div class="bg-ambient"></div>
     <canvas id="particles-canvas"></canvas>
 
+    <!-- Parallax Layers -->
+    <div class="parallax-layer parallax-layer-1" id="parallax1"></div>
+    <div class="parallax-layer parallax-layer-2" id="parallax2"></div>
+    <div class="parallax-layer parallax-layer-3" id="parallax3"></div>
+
+
     <!-- Navigation -->
     <nav class="glass-nav">
         <div class="container nav-container">
@@ -286,87 +292,12 @@
                         </div>
 
                         <div class="model-badge-hero">
-                            <i class="fas fa-microchip"></i> MODEL: RANDOM FOREST (99.5%)
+                            <i class="fas fa-microchip"></i> MODEL: PRE-RELEASE RANDOM FOREST (67.65%)
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Director's Mode (What-If Simulation) -->
-            <div id="simulationPanel" class="glass-card simulation-card mb-4 reveal-on-scroll" style="display: none;">
-                <div class="simulation-header mb-4">
-                    <h4><i class="fas fa-sliders-h"></i> DIRECTOR'S MODE <span class="badge-glow ms-2"
-                            style="font-size: 0.7em;">BETA</span></h4>
-                    <p class="text-muted">Điều chỉnh các thông số để xem chúng tác động như thế nào đến xác suất thành
-                        công theo thời gian thực.</p>
-                </div>
-
-                <div class="row">
-                    <!-- Sliders Column -->
-                    <div class="col-md-7">
-                        <div class="row g-4">
-                            <!-- Budget Slider -->
-                            <div class="col-12 col-md-6">
-                                <div class="control-group h-100">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <label class="control-label"><i class="fas fa-money-bill-wave"></i>
-                                            Budget</label>
-                                        <span class="control-value mono-text" id="simBudgetVal">$0</span>
-                                    </div>
-                                    <input type="range" class="form-range custom-range" id="simBudget" min="100000"
-                                        max="300000000" step="1000000">
-                                </div>
-                            </div>
-
-                            <!-- Revenue Slider -->
-                            <div class="col-12 col-md-6">
-                                <div class="control-group h-100">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <label class="control-label"><i class="fas fa-hand-holding-usd"></i>
-                                            Revenue</label>
-                                        <span class="control-value mono-text" id="simRevenueVal">$0</span>
-                                    </div>
-                                    <input type="range" class="form-range custom-range" id="simRevenue" min="0"
-                                        max="1000000000" step="1000000">
-                                </div>
-                            </div>
-
-                            <!-- Runtime Slider -->
-                            <div class="col-12 col-md-6">
-                                <div class="control-group h-100">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <label class="control-label"><i class="fas fa-clock"></i> Runtime</label>
-                                        <span class="control-value mono-text" id="simRuntimeVal">0 min</span>
-                                    </div>
-                                    <input type="range" class="form-range custom-range" id="simRuntime" min="60"
-                                        max="240" step="5">
-                                </div>
-                            </div>
-
-                            <!-- Vote Average Slider -->
-                            <div class="col-12 col-md-6">
-                                <div class="control-group h-100">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <label class="control-label"><i class="fas fa-star"></i> Target Rating</label>
-                                        <span class="control-value mono-text" id="simVoteVal">0.0</span>
-                                    </div>
-                                    <input type="range" class="form-range custom-range" id="simVote" min="1.0"
-                                        max="10.0" step="0.1">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Live Result Column -->
-                    <div class="col-md-5 d-flex align-items-center justify-content-center">
-                        <div class="sim-result-box text-center">
-                            <div class="sim-label mb-2">SIMULATED CHANCE</div>
-                            <div class="sim-score" id="simScore">--%</div>
-                            <div class="sim-delta" id="simDelta"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <div class="row mt-5" style="margin-top: 4rem !important;">
                 <!-- Feature Importance Chart -->
@@ -400,8 +331,10 @@
                     <span class="badge-glow">PROJECT REPORT</span>
                     <h2 class="story-title">THE DATA <span class="text-stroke">JOURNEY</span></h2>
                     <p class="story-lead text-reveal">
-                        Từ 2,000 dòng dữ liệu thô đến một cỗ máy dự đoán chính xác 99%. Đây là câu chuyện về cách chúng
-                        tôi tìm ra công thức của một "Bom Tấn".
+                        Xây dựng mô hình dự đoán <strong>Pre-Release</strong> - chỉ sử dụng thông tin có sẵn trước khi
+                        phim ra mắt,
+                        loại bỏ hoàn toàn <em>data leakage</em>. Đây là cách chúng tôi biến dữ liệu thành insight thực
+                        sự.
                     </p>
                 </div>
 
@@ -419,10 +352,11 @@
                                     tế không bao giờ hoàn hảo: 1,173 dòng thiếu ngân sách, hàng loạt giá trị bị khuyết.
                                 </p>
                                 <p>
-                                    Suốt 4 tuần đầu, chúng tôi tỉ mỉ làm sạch từng dòng dữ liệu. Không chỉ dừng lại ở
-                                    đó, <strong>47 đặc trưng mới</strong> (Features) đã được kiến tạo: từ việc giải mã
-                                    <em>"Ngày phát hành"</em> để tìm ra xu hướng mùa vụ, đến việc phân tích <em>"Độ dài
-                                        phim"</em> và sức hút của dàn diễn viên.
+                                    Mô hình Pre-Release chỉ sử dụng thông tin biết trước: <strong>Ngân sách</strong>,
+                                    <strong>Thể loại</strong>, <strong>Thời lượng</strong>, và <strong>Thời điểm phát
+                                        hành</strong>.
+                                    Không có revenue, vote count, hay popularity - những data chỉ có sau khi phim đã
+                                    chiếu.
                                 </p>
                                 <div class="stats-mini-grid">
                                     <div class="stat-mini">
@@ -430,8 +364,8 @@
                                         <span>CLEAN SAMPLES</span>
                                     </div>
                                     <div class="stat-mini">
-                                        <strong class="mono-text">47</strong>
-                                        <span>ENGINEERED FEATURES</span>
+                                        <strong class="mono-text">37</strong>
+                                        <span>PRE-RELEASE FEATURES</span>
                                     </div>
                                 </div>
                             </div>
@@ -461,40 +395,41 @@
                                     <div class="comparison-bar">
                                         <div class="model-name">
                                             <span>Logistic Regression (Baseline)</span>
-                                            <span>84.88%</span>
+                                            <span>62.35%</span>
                                         </div>
                                         <div class="progress-bar">
-                                            <div class="progress" style="width: 84.88%"></div>
+                                            <div class="progress" style="width: 62.35%"></div>
                                         </div>
                                     </div>
                                     <div class="comparison-bar winner">
                                         <div class="model-name">
-                                            <span class="highlight">Random Forest Optimized <i
+                                            <span class="highlight">Pre-Release Random Forest <i
                                                     class="fas fa-crown"></i></span>
-                                            <span class="highlight">99.52%</span>
+                                            <span class="highlight">67.65%</span>
                                         </div>
                                         <div class="progress-bar">
-                                            <div class="progress" style="width: 99.52%"></div>
+                                            <div class="progress" style="width: 67.65%"></div>
                                         </div>
                                     </div>
                                     <p class="text-muted" style="font-size: 0.85rem; margin-top: 15px;">
-                                        Được kiểm chứng qua <strong>5-Fold Cross-Validation</strong>, Random Forest
-                                        chứng minh sự ổn định tuyệt đối với độ lệch chuẩn chỉ 0.0072.
+                                        Với <strong>Pre-Release data</strong> (không có data leakage), độ chính xác
+                                        67.65%
+                                        phản ánh thực tế thị trường điện ảnh khó đoán.
                                     </p>
                                 </div>
                             </div>
                             <div class="col-text reveal-right stagger-2">
                                 <p>
-                                    Tuần thứ 5 là sàn đấu của các thuật toán. <strong>Logistic Regression</strong> bước
-                                    lên đài với tư cách là Baseline, đạt độ chính xác 84.8% - một con số đáng nể nhưng
-                                    chưa đủ.
+                                    Thách thức lớn nhất: dự đoán <strong>trước khi</strong> phim ra mắt. Không có doanh
+                                    thu,
+                                    điểm đánh giá hay độ phổ biến - chỉ có thông tin mà nhà sản xuất biết trước.
                                 </p>
                                 <p>
-                                    Đối thủ của nó, <strong>Random Forest</strong>, đã tạo nên một cú đột phá. Với khả
-                                    năng học sâu các mối quan hệ phi tuyến tính phức tạp giữa <em>Ngân sách</em>,
-                                    <em>Thể loại</em> và <em>Đánh giá</em>, mô hình này đã đạt tới độ chính xác gần như
-                                    tuyệt đối: <strong>99.52%</strong>. Không có hiện tượng Overfitting, đây là một
-                                    chiến thắng thuyết phục.
+                                    <strong>Random Forest</strong> với 37 features pre-release đạt 67.65% - con số thực
+                                    tế
+                                    phản ánh độ khó của việc tiên đoán thành công. Đây là mô hình <em>có ý nghĩa thực
+                                        tiễn</em>,
+                                    không phải accuracy ảo từ data leakage.
                                 </p>
                             </div>
                         </div>
@@ -514,37 +449,119 @@
                         </p>
                         <div class="insights-grid">
                             <div class="glass-card insight-card reveal-on-scroll stagger-1">
-                                <div class="insight-icon"><i class="fas fa-star"></i></div>
-                                <h4>QUALITY IS KING</h4>
-                                <div class="insight-value">76.5%</div>
+                                <div class="insight-icon"><i class="fas fa-dollar-sign"></i></div>
+                                <h4>BUDGET MATTERS</h4>
+                                <div class="insight-value">45%</div>
                                 <p style="font-size: 0.85rem; color: var(--text-muted);">
-                                    <strong>Vote Average</strong> là yếu tố thống trị. Khán giả không bị đánh lừa bởi
-                                    marketing. Phim hay (Avg > 7.2) chắc chắn sẽ thắng.
+                                    <strong>Ngân sách</strong> là yếu tố quan trọng nhất. Phim có budget cao thường có
+                                    nguồn lực marketing và sản xuất tốt hơn.
                                 </p>
                             </div>
                             <div class="glass-card insight-card reveal-on-scroll stagger-2">
-                                <div class="insight-icon"><i class="fas fa-chart-line"></i></div>
-                                <h4>FINANCIAL HEALTH</h4>
-                                <div class="insight-value">23.5%</div>
+                                <div class="insight-icon"><i class="fas fa-film"></i></div>
+                                <h4>GENRE POWER</h4>
+                                <div class="insight-value">30%</div>
                                 <p style="font-size: 0.85rem; color: var(--text-muted);">
-                                    <strong>ROI & Budget</strong> đóng vai trò hỗ trợ. Một bộ phim cần quản lý vốn tốt,
-                                    nhưng tiền bạc không thể cứu vãn một kịch bản tồi.
+                                    <strong>Thể loại phim</strong> ảnh hưởng lớn đến tiềm năng. Action, Adventure,
+                                    Sci-Fi
+                                    thường có tỉ lệ thành công cao hơn.
                                 </p>
                             </div>
                             <div class="glass-card insight-card reveal-on-scroll stagger-3">
-                                <div class="insight-icon"><i class="fas fa-cogs"></i></div>
-                                <h4>SMART ENGINEERING</h4>
-                                <div class="insight-value">TOP 3</div>
+                                <div class="insight-icon"><i class="fas fa-calendar-alt"></i></div>
+                                <h4>TIMING IS KEY</h4>
+                                <div class="insight-value">25%</div>
                                 <p style="font-size: 0.85rem; color: var(--text-muted);">
-                                    Các biến số do chúng tôi tạo ra như <em>roi_clipped</em> đã lọt vào Top 3 yếu tố
-                                    quan trọng nhất, chứng minh giá trị của Feature Engineering.
+                                    <strong>Thời điểm phát hành</strong>: Mùa hè (6-7) và Holiday (11-12) là thời điểm
+                                    vàng
+                                    cho phim bom tấn.
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Data Visualization Section -->
+                <div class="dataviz-section reveal-on-scroll" style="margin-top: 80px; margin-bottom: 60px;">
+                    <div class="section-header-center" style="margin-bottom: 40px;">
+                        <span class="badge-glow"><i class="fas fa-chart-area"></i> DATA VISUALIZATION</span>
+                        <h3 class="story-title" style="font-size: 2rem; margin-top: 16px;">MARKET <span
+                                class="text-stroke">INSIGHTS</span></h3>
+                    </div>
+
+                    <div class="dataviz-grid">
+                        <!-- Budget Impact Chart -->
+                        <div class="dataviz-card reveal-on-scroll stagger-1">
+                            <h4><i class="fas fa-coins"></i> BUDGET VS SUCCESS</h4>
+                            <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 12px;">Ngân sách ảnh hưởng
+                                thế nào đến thành công?</p>
+                            <div class="dataviz-chart">
+                                <canvas id="budgetScatterChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Genre Heatmap -->
+                        <div class="dataviz-card reveal-on-scroll stagger-2">
+                            <h4><i class="fas fa-th"></i> GENRE SUCCESS RATE</h4>
+                            <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 12px;">Thể loại nào có tỉ lệ
+                                thành công cao nhất?</p>
+                            <div class="heatmap-grid" id="genreHeatmap">
+                                <!-- Generated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Monthly Timeline -->
+                        <div class="dataviz-card reveal-on-scroll stagger-3">
+                            <h4><i class="fas fa-calendar-check"></i> BEST RELEASE MONTHS</h4>
+                            <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 12px;">Thời điểm vàng để phát
+                                hành phim</p>
+                            <div class="monthly-timeline" id="monthlyTimeline">
+                                <!-- Generated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Comparison Chart -->
+                        <div class="dataviz-card reveal-on-scroll stagger-4">
+                            <h4><i class="fas fa-balance-scale"></i> YOUR MOVIE VS AVERAGE</h4>
+                            <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 12px;">So sánh với phim trung
+                                bình</p>
+                            <div class="comparison-bars" id="comparisonBars">
+                                <div class="comparison-item">
+                                    <span class="comparison-label">Budget</span>
+                                    <div class="comparison-bar-container">
+                                        <div class="comparison-bar-yours" id="cmp-budget" style="width: 0%"></div>
+                                        <div class="comparison-bar-avg" style="width: 60%"></div>
+                                    </div>
+                                </div>
+                                <div class="comparison-item">
+                                    <span class="comparison-label">Runtime</span>
+                                    <div class="comparison-bar-container">
+                                        <div class="comparison-bar-yours" id="cmp-runtime" style="width: 0%"></div>
+                                        <div class="comparison-bar-avg" style="width: 70%"></div>
+                                    </div>
+                                </div>
+                                <div class="comparison-item">
+                                    <span class="comparison-label">Genres</span>
+                                    <div class="comparison-bar-container">
+                                        <div class="comparison-bar-yours" id="cmp-genres" style="width: 0%"></div>
+                                        <div class="comparison-bar-avg" style="width: 50%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="comparison-legend">
+                                <div class="legend-item">
+                                    <div class="legend-dot yours"></div> Phim của bạn
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-dot avg"></div> Trung bình
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Conclusion -->
+
                 <div class="story-footer text-center mt-5 reveal-on-scroll"
                     style="text-align: center; margin-top: 60px;">
                     <p class="story-lead text-reveal">
@@ -601,6 +618,15 @@
             <p class="mono-text">MOVIE PREDICT | GROUP 04 HUMG | kwishtt/VietNamMoviesPredict </p>
         </div>
     </footer>
+
+    <!-- Floating Action Button -->
+    <div class="fab-container">
+        <button class="fab-button" id="fabPredict"
+            onclick="document.getElementById('predict').scrollIntoView({behavior: 'smooth'})">
+            <i class="fas fa-magic"></i>
+        </button>
+        <span class="fab-tooltip">Dự đoán ngay</span>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>

@@ -30,129 +30,6 @@ const App = {
     elements.forEach(el => observer.observe(el));
   },
 
-  // --- Simulation Mode Logic ---
-  initSimulationMode(originalData) {
-    const panel = document.getElementById('simulationPanel');
-    const simBudget = document.getElementById('simBudget');
-    const simRevenue = document.getElementById('simRevenue');
-    const simRuntime = document.getElementById('simRuntime');
-    const simVote = document.getElementById('simVote');
-
-    // Show panel
-    panel.style.display = 'block';
-
-    // Set initial values from original prediction
-    simBudget.value = originalData.budget;
-    simRevenue.value = originalData.revenue || 0;
-    simRuntime.value = originalData.runtime;
-    simVote.value = originalData.voteAverage;
-
-    this.updateSimDisplay(originalData.budget, originalData.revenue || 0, originalData.runtime, originalData.voteAverage);
-
-    // Store original probability for comparison
-    this.originalProb = originalData.success_probability || 0;
-    document.getElementById('simScore').innerText = Math.round(this.originalProb * 100) + '%';
-    document.getElementById('simDelta').innerText = '';
-
-    // Debounce function for API calls
-    const debounce = (func, wait) => {
-      let timeout;
-      return function executedFunction(...args) {
-        const later = () => {
-          clearTimeout(timeout);
-          func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-      };
-    };
-
-    // Event Listeners
-    const handleUpdate = () => {
-      const budget = parseFloat(simBudget.value);
-      const revenue = parseFloat(simRevenue.value);
-      const runtime = parseInt(simRuntime.value);
-      const vote = parseFloat(simVote.value);
-
-      this.updateSimDisplay(budget, revenue, runtime, vote);
-      this.runSimulation(originalData, budget, revenue, runtime, vote);
-    };
-
-    const debouncedUpdate = debounce(handleUpdate, 500); // Wait 500ms after sliding stops
-
-    simBudget.oninput = () => this.updateSimDisplay(simBudget.value, simRevenue.value, simRuntime.value, simVote.value);
-    simRevenue.oninput = () => this.updateSimDisplay(simBudget.value, simRevenue.value, simRuntime.value, simVote.value);
-    simRuntime.oninput = () => this.updateSimDisplay(simBudget.value, simRevenue.value, simRuntime.value, simVote.value);
-    simVote.oninput = () => this.updateSimDisplay(simBudget.value, simRevenue.value, simRuntime.value, simVote.value);
-
-    simBudget.onchange = debouncedUpdate;
-    simRevenue.onchange = debouncedUpdate;
-    simRuntime.onchange = debouncedUpdate;
-    simVote.onchange = debouncedUpdate;
-  },
-
-  updateSimDisplay(budget, revenue, runtime, vote) {
-    document.getElementById('simBudgetVal').innerText = '$' + parseInt(budget).toLocaleString();
-    document.getElementById('simRevenueVal').innerText = '$' + parseInt(revenue).toLocaleString();
-    document.getElementById('simRuntimeVal').innerText = runtime + ' min';
-    document.getElementById('simVoteVal').innerText = parseFloat(vote).toFixed(1);
-  },
-
-  async runSimulation(baseData, newBudget, newRevenue, newRuntime, newVote) {
-    // Show loading state
-    const scoreEl = document.getElementById('simScore');
-    scoreEl.style.opacity = '0.5';
-
-    try {
-      // Prepare simulation payload
-      const payload = {
-        ...baseData, // Copy all original fields (genres, etc.)
-        budget: newBudget,
-        revenue: newRevenue,
-        runtime: newRuntime,
-        voteAverage: newVote
-      };
-
-      const response = await fetch('/predict', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        const newProb = result.prediction.success_probability;
-        const percent = Math.round(newProb * 100);
-
-        scoreEl.innerText = percent + '%';
-        scoreEl.style.opacity = '1';
-
-        // Calculate Delta
-        const delta = newProb - this.originalProb;
-        const deltaEl = document.getElementById('simDelta');
-
-        if (Math.abs(delta) < 0.001) {
-          deltaEl.innerText = 'No Change';
-          deltaEl.className = 'sim-delta';
-        } else if (delta > 0) {
-          deltaEl.innerText = `+${(delta * 100).toFixed(1)}% Boost`;
-          deltaEl.className = 'sim-delta positive';
-        } else {
-          deltaEl.innerText = `${(delta * 100).toFixed(1)}% Drop`;
-          deltaEl.className = 'sim-delta negative';
-        }
-
-        // Optional: Play sound effect here
-      }
-    } catch (error) {
-      console.error('Simulation error:', error);
-      scoreEl.style.opacity = '1';
-    }
-  },
-
   setupStoryCharts() {
     // Genre Distribution Chart (Doughnut)
     const genreCtx = document.getElementById('genreChart');
@@ -393,13 +270,6 @@ const App = {
       document.getElementById('results').style.display = 'block';
       document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
 
-      // Initialize Simulation Mode with input data + prediction result
-      const simulationData = {
-        ...data,
-        success_probability: result.prediction.success_probability
-      };
-      this.initSimulationMode(simulationData);
-
       if (result.success) {
         this.showResults(result);
       } else {
@@ -476,12 +346,23 @@ const App = {
     const riskDisplay = typeof riskScore === 'number' ? `${riskScore}%` : riskScore;
     document.getElementById('risk-value').textContent = riskDisplay;
 
-    // Display success score instead of revenue (Pre-Release doesn't have revenue)
-    document.getElementById('revenue-value').textContent = `${successScore}%`;
+    // Display success score with animated counter
+    const revenueEl = document.getElementById('revenue-value');
+    if (typeof successScore === 'number') {
+      this.animateCounter(revenueEl, successScore, 1200, '', '%');
+    } else {
+      revenueEl.textContent = `${successScore}%`;
+    }
 
     // Render Charts
     this.renderFeatureChart(data.feature_importance);
     this.renderRadarChart(data.input_data);
+
+    // Update Comparison Bars with user input data
+    const budget = data.input_data.budget || 0;
+    const runtime = data.input_data.runtime || 0;
+    const genreCount = data.input_data.genres?.length || 1;
+    this.updateComparisonBars(budget, runtime, genreCount);
   },
 
   renderRadarChart(inputData) {
@@ -708,10 +589,240 @@ const App = {
       }
     });
     document.getElementById('genres').value = selectedGenres.join(',');
+  },
+
+  // === NEW: 3D Tilt Effect cho Movie Cards ===
+  setup3DTilt() {
+    const cards = document.querySelectorAll('.movie-card');
+    cards.forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const tiltX = (x - centerX) / centerX * 10;
+        const tiltY = (centerY - y) / centerY * 10;
+
+        card.style.setProperty('--tilt-x', `${tiltX}deg`);
+        card.style.setProperty('--tilt-y', `${tiltY}deg`);
+        card.classList.add('tilt-active');
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.classList.remove('tilt-active');
+        card.style.setProperty('--tilt-x', '0deg');
+        card.style.setProperty('--tilt-y', '0deg');
+      });
+    });
+  },
+
+  // === NEW: Animated Number Counters ===
+  animateCounter(element, target, duration = 1000, prefix = '', suffix = '') {
+    const start = 0;
+    const startTime = performance.now();
+
+    const update = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+      const current = Math.floor(start + (target - start) * easeProgress);
+
+      element.textContent = prefix + current.toLocaleString() + suffix;
+      element.classList.add('counting');
+
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        element.classList.remove('counting');
+      }
+    };
+
+    requestAnimationFrame(update);
+  },
+
+  // === NEW: Parallax Scrolling ===
+  setupParallax() {
+    const layers = document.querySelectorAll('.parallax-layer');
+    if (layers.length === 0) return;
+
+    window.addEventListener('scroll', () => {
+      const scrollY = window.pageYOffset;
+
+      layers.forEach((layer, index) => {
+        const speed = 0.1 + (index * 0.05);
+        const yPos = scrollY * speed;
+        layer.style.transform = `translateY(${yPos}px)`;
+      });
+    });
+  },
+
+  // === NEW: Init Data Viz Charts ===
+  initDataVizCharts() {
+    this.setupBudgetScatterChart();
+    this.setupGenreHeatmap();
+    this.setupMonthlyTimeline();
+  },
+
+  // Budget vs Success Scatter Chart
+  setupBudgetScatterChart() {
+    const ctx = document.getElementById('budgetScatterChart');
+    if (!ctx) return;
+
+    // Sample data simulating budget vs success
+    const data = [
+      { x: 5, y: 30, success: false },
+      { x: 15, y: 45, success: false },
+      { x: 25, y: 55, success: true },
+      { x: 50, y: 65, success: true },
+      { x: 80, y: 70, success: true },
+      { x: 100, y: 75, success: true },
+      { x: 150, y: 78, success: true },
+      { x: 200, y: 82, success: true },
+      { x: 10, y: 35, success: false },
+      { x: 30, y: 50, success: false },
+      { x: 45, y: 60, success: true },
+      { x: 70, y: 72, success: true },
+      { x: 120, y: 68, success: true },
+      { x: 180, y: 85, success: true },
+    ];
+
+    new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: 'Thành công',
+          data: data.filter(d => d.success),
+          backgroundColor: 'rgba(0, 245, 212, 0.6)',
+          borderColor: '#00f5d4',
+          borderWidth: 2,
+          pointRadius: 8,
+          pointHoverRadius: 12
+        }, {
+          label: 'Thất bại',
+          data: data.filter(d => !d.success),
+          backgroundColor: 'rgba(255, 71, 87, 0.6)',
+          borderColor: '#ff4757',
+          borderWidth: 2,
+          pointRadius: 8,
+          pointHoverRadius: 12
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              color: '#94a3b8',
+              font: { size: 10 },
+              boxWidth: 10
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: { display: true, text: 'Budget (M$)', color: '#6b7c93' },
+            grid: { color: 'rgba(255,255,255,0.05)' }
+          },
+          y: {
+            title: { display: true, text: 'Success Score', color: '#6b7c93' },
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            min: 0,
+            max: 100
+          }
+        }
+      }
+    });
+  },
+
+  // Genre Heatmap
+  setupGenreHeatmap() {
+    const container = document.getElementById('genreHeatmap');
+    if (!container) return;
+
+    const genres = [
+      { name: 'Action', rate: 72 },
+      { name: 'Adventure', rate: 68 },
+      { name: 'Comedy', rate: 55 },
+      { name: 'Drama', rate: 48 },
+      { name: 'Fantasy', rate: 65 },
+      { name: 'Horror', rate: 52 },
+      { name: 'Sci-Fi', rate: 70 },
+      { name: 'Thriller', rate: 58 },
+      { name: 'Romance', rate: 45 },
+      { name: 'Animation', rate: 75 },
+      { name: 'Crime', rate: 50 },
+      { name: 'Family', rate: 62 }
+    ];
+
+    container.innerHTML = genres.map(g => {
+      const hue = (g.rate / 100) * 120; // 0=red, 120=green
+      const color = `hsl(${hue}, 70%, 50%)`;
+      return `
+        <div class="heatmap-cell" style="background: ${color}">
+          <span>${g.rate}%</span>
+          <div class="heatmap-cell-tooltip">${g.name}: ${g.rate}% thành công</div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  // Monthly Timeline
+  setupMonthlyTimeline() {
+    const container = document.getElementById('monthlyTimeline');
+    if (!container) return;
+
+    const months = [
+      { name: 'Jan', value: 45, golden: false },
+      { name: 'Feb', value: 52, golden: false },
+      { name: 'Mar', value: 58, golden: false },
+      { name: 'Apr', value: 50, golden: false },
+      { name: 'May', value: 65, golden: false },
+      { name: 'Jun', value: 82, golden: true },
+      { name: 'Jul', value: 85, golden: true },
+      { name: 'Aug', value: 68, golden: false },
+      { name: 'Sep', value: 55, golden: false },
+      { name: 'Oct', value: 60, golden: false },
+      { name: 'Nov', value: 78, golden: true },
+      { name: 'Dec', value: 80, golden: true }
+    ];
+
+    container.innerHTML = months.map(m => `
+      <div class="month-bar ${m.golden ? 'golden' : ''}" style="height: 100%">
+        <div class="month-bar-fill" style="height: ${m.value}%"></div>
+        <span class="month-label">${m.name}</span>
+        <span class="month-value">${m.value}%</span>
+      </div>
+    `).join('');
+  },
+
+  // === NEW: Update Comparison Bars khi predict ===
+  updateComparisonBars(budget, runtime, genreCount) {
+    // Average values (based on dataset)
+    const avgBudget = 40000000;
+    const avgRuntime = 110;
+    const avgGenres = 2;
+
+    const budgetPercent = Math.min((budget / avgBudget) * 60, 100);
+    const runtimePercent = Math.min((runtime / avgRuntime) * 70, 100);
+    const genrePercent = Math.min((genreCount / avgGenres) * 50, 100);
+
+    const cmpBudget = document.getElementById('cmp-budget');
+    const cmpRuntime = document.getElementById('cmp-runtime');
+    const cmpGenres = document.getElementById('cmp-genres');
+
+    if (cmpBudget) cmpBudget.style.width = `${budgetPercent}%`;
+    if (cmpRuntime) cmpRuntime.style.width = `${runtimePercent}%`;
+    if (cmpGenres) cmpGenres.style.width = `${genrePercent}%`;
   }
 };
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
+  App.setup3DTilt();
+  App.setupParallax();
+  App.initDataVizCharts();
 });
