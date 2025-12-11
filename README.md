@@ -323,7 +323,7 @@ Dự án được thực hiện bởi **Nhóm 04 - Khoa Học Dữ Liệu - HUMG
 | Đỗ Ngọc Khang | Team Lead - ML Engineer |
 
 - 📧 **Email:** kforwork04@gmail.com
-- 🔗 **Repository:** [GitHub Link](https://github.com/kwishtt/Do_An_1)
+- 🔗 **Repository:** [GitHub Link](https://github.com/kwishtt/VietNamMoviesPredict)
 
 ---
 
