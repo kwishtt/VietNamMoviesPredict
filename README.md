@@ -318,9 +318,6 @@ Web Application được xây dựng bằng **Flask** với giao diện Modern D
 
 Dự án được thực hiện bởi **Nhóm 04 - Khoa Học Dữ Liệu - HUMG**.
 
-| Thành Viên | Vai Trò |
-|------------|---------|
-| Đỗ Ngọc Khang | Team Lead - ML Engineer |
 
 - 📧 **Email:** kforwork04@gmail.com
 - 🔗 **Repository:** [GitHub Link](https://github.com/kwishtt/VietNamMoviesPredict)
