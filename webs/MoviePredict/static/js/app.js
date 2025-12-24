@@ -2,11 +2,70 @@
  * MoviePredict - Cinematic Dark Theme Logic
  */
 
+// ===============================================
+// TRANSLATIONS - Tiếng Việt
+// ===============================================
+const GENRE_TRANSLATIONS = {
+  'Action': 'Hành Động',
+  'Adventure': 'Phiêu Lưu',
+  'Comedy': 'Hài Hước',
+  'Drama': 'Chính Kịch',
+  'Thriller': 'Giật Gân',
+  'Science Fiction': 'Khoa Học Viễn Tưởng',
+  'Sci-Fi': 'Khoa Học Viễn Tưởng',
+  'Family': 'Gia Đình',
+  'Fantasy': 'Kỳ Ảo',
+  'Crime': 'Tội Phạm',
+  'Animation': 'Hoạt Hình',
+  'Horror': 'Kinh Dị',
+  'Romance': 'Lãng Mạn',
+  'Mystery': 'Bí Ẩn',
+  'History': 'Lịch Sử',
+  'Music': 'Âm Nhạc',
+  'War': 'Chiến Tranh',
+  'Documentary': 'Tài Liệu',
+  'Western': 'Viễn Tây'
+};
+
+const COUNTRY_TRANSLATIONS = {
+  'United States of America': 'Hoa Kỳ',
+  'USA': 'Hoa Kỳ',
+  'Vietnam': 'Việt Nam',
+  'United Kingdom': 'Anh Quốc',
+  'UK': 'Anh Quốc',
+  'China': 'Trung Quốc',
+  'South Korea': 'Hàn Quốc',
+  'Korea': 'Hàn Quốc',
+  'France': 'Pháp',
+  'Japan': 'Nhật Bản',
+  'India': 'Ấn Độ',
+  'Australia': 'Úc',
+  'Canada': 'Canada',
+  'Germany': 'Đức',
+  'Italy': 'Ý',
+  'Spain': 'Tây Ban Nha'
+};
+
+// Hàm chuyển đổi ngôn ngữ
+function translateGenre(genre) {
+  return GENRE_TRANSLATIONS[genre] || genre;
+}
+
+function translateCountry(country) {
+  return COUNTRY_TRANSLATIONS[country] || country;
+}
+
+function translateGenreList(genres) {
+  if (!Array.isArray(genres)) return genres;
+  return genres.map(g => translateGenre(g));
+}
+
 const App = {
+  selectedGenres: [],
   init() {
     this.setupEventListeners();
-    this.setupCharts();
     this.renderGenreChips();
+    this.setupCharts();
     this.setupParticles();
     this.setupStoryCharts();
     this.setupScrollAnimations();
@@ -215,25 +274,39 @@ const App = {
     const genres = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Romance', 'Sci-Fi', 'Thriller'];
     const container = document.getElementById('genre-selector');
     const input = document.getElementById('genres');
-    let selected = [];
+    this.selectedGenres = this.selectedGenres || [];
 
     if (!container) return;
+    container.innerHTML = '';
 
     genres.forEach(genre => {
       const chip = document.createElement('div');
       chip.className = 'genre-chip';
-      chip.textContent = genre;
-      chip.addEventListener('click', () => {
-        chip.classList.toggle('active');
-        if (selected.includes(genre)) {
-          selected = selected.filter(g => g !== genre);
+      const vietnameseName = translateGenre(genre);
+      chip.innerHTML = `<span class="genre-en">${genre}</span>`; // Chuẩn hóa hiển thị tiếng Anh
+      chip.dataset.genre = genre; // Lưu tên tiếng Anh để gửi API
+      chip.title = `${genre} • ${vietnameseName}`; // Tooltip song ngữ
+      if (App.selectedGenres.includes(genre)) {
+        chip.classList.add('active');
+      }
+
+      chip.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const existingIndex = App.selectedGenres.indexOf(genre);
+        if (existingIndex > -1) {
+          App.selectedGenres.splice(existingIndex, 1);
+          chip.classList.remove('active');
         } else {
-          selected.push(genre);
+          App.selectedGenres.push(genre);
+          chip.classList.add('active');
         }
-        input.value = selected.join(',');
+        if (input) input.value = App.selectedGenres.join(',');
+        console.log('Selected genres:', App.selectedGenres);
       });
       container.appendChild(chip);
     });
+    if (input) input.value = App.selectedGenres.join(',');
   },
 
   async handlePrediction(e) {
@@ -563,6 +636,10 @@ const App = {
   },
 
   setupCharts() {
+    if (typeof Chart === 'undefined') {
+      console.warn('Chart.js not available, skipping chart defaults');
+      return;
+    }
     // Global Chart Defaults for Dark Theme
     Chart.defaults.color = '#94a3b8';
     Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.05)';
@@ -580,15 +657,16 @@ const App = {
     const allGenres = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Romance', 'Sci-Fi', 'Thriller'];
     const numGenres = Math.floor(Math.random() * 3) + 1;
     const selectedGenres = allGenres.sort(() => 0.5 - Math.random()).slice(0, numGenres);
+    App.selectedGenres = [...selectedGenres];
 
     // Update genre chips
     document.querySelectorAll('.genre-chip').forEach(chip => {
-      chip.classList.remove('active');
-      if (selectedGenres.includes(chip.textContent)) {
-        chip.classList.add('active');
-      }
+      const chipGenre = chip.dataset.genre;
+      const isActive = selectedGenres.includes(chipGenre);
+      chip.classList.toggle('active', isActive);
     });
-    document.getElementById('genres').value = selectedGenres.join(',');
+    const genresInput = document.getElementById('genres');
+    if (genresInput) genresInput.value = App.selectedGenres.join(',');
   },
 
   // === NEW: 3D Tilt Effect cho Movie Cards ===

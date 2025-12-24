@@ -1,13 +1,3 @@
-"""
-Pre-Release Movie Success Prediction Model
-==========================================
-Train Random Forest model chỉ sử dụng features biết trước khi phim ra mắt.
-Loại bỏ data leakage từ revenue, vote_average, roi.
-
-Author: Team Do An
-Date: 2024
-"""
-
 import pandas as pd
 import numpy as np
 import pickle
@@ -192,9 +182,9 @@ def train_model(X: pd.DataFrame, y: pd.Series) -> tuple:
         'f1_score': f1_score(y_test, y_pred)
     }
     
-    logger.info("=" * 50)
+    logger.info("="* 50)
     logger.info("EVALUATION METRICS")
-    logger.info("=" * 50)
+    logger.info("="* 50)
     logger.info(f"Accuracy:  {metrics['accuracy']:.4f} ({metrics['accuracy']*100:.2f}%)")
     logger.info(f"Precision: {metrics['precision']:.4f}")
     logger.info(f"Recall:    {metrics['recall']:.4f}")
@@ -202,18 +192,18 @@ def train_model(X: pd.DataFrame, y: pd.Series) -> tuple:
     
     # Classification report
     logger.info("\nClassification Report:")
-    logger.info("\n" + classification_report(y_test, y_pred, target_names=['Thất bại', 'Thành công']))
+    logger.info("\n"+ classification_report(y_test, y_pred, target_names=['Thất bại', 'Thành công']))
     
     # Confusion matrix
     cm = confusion_matrix(y_test, y_pred)
     logger.info(f"\nConfusion Matrix:")
-    logger.info(f"  TN={cm[0,0]}, FP={cm[0,1]}")
-    logger.info(f"  FN={cm[1,0]}, TP={cm[1,1]}")
+    logger.info(f" TN={cm[0,0]}, FP={cm[0,1]}")
+    logger.info(f" FN={cm[1,0]}, TP={cm[1,1]}")
     
     # Cross-validation
-    logger.info("\n" + "=" * 50)
+    logger.info("\n"+ "="* 50)
     logger.info("5-FOLD CROSS VALIDATION")
-    logger.info("=" * 50)
+    logger.info("="* 50)
     
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
     cv_scores = cross_val_score(model, scaler.transform(X), y, cv=cv, scoring='accuracy')
@@ -229,9 +219,9 @@ def train_model(X: pd.DataFrame, y: pd.Series) -> tuple:
 
 def analyze_feature_importance(model, feature_names: list) -> pd.DataFrame:
     """Phân tích Feature Importance."""
-    logger.info("\n" + "=" * 50)
+    logger.info("\n"+ "="* 50)
     logger.info("FEATURE IMPORTANCE")
-    logger.info("=" * 50)
+    logger.info("="* 50)
     
     importance_df = pd.DataFrame({
         'feature': feature_names,
@@ -241,7 +231,7 @@ def analyze_feature_importance(model, feature_names: list) -> pd.DataFrame:
     # Top 15 features
     logger.info("\nTop 15 Features quan trọng nhất:")
     for i, row in importance_df.head(15).iterrows():
-        logger.info(f"  {row['feature']}: {row['importance']*100:.2f}%")
+        logger.info(f" {row['feature']}: {row['importance']*100:.2f}%")
     
     return importance_df
 
@@ -281,9 +271,9 @@ def main():
     log_file = output_dir / 'training_log.txt'
     logger = setup_logging(str(log_file))
     
-    logger.info("=" * 60)
+    logger.info("="* 60)
     logger.info("PRE-RELEASE MOVIE SUCCESS PREDICTION MODEL")
-    logger.info("=" * 60)
+    logger.info("="* 60)
     
     # Load data
     df = load_data(str(data_path))
@@ -291,8 +281,8 @@ def main():
     # Thống kê label
     success_rate = df['success'].mean()
     logger.info(f"\nPhân bố label:")
-    logger.info(f"  Thành công: {df['success'].sum()} ({success_rate*100:.1f}%)")
-    logger.info(f"  Thất bại: {len(df) - df['success'].sum()} ({(1-success_rate)*100:.1f}%)")
+    logger.info(f" Thành công: {df['success'].sum()} ({success_rate*100:.1f}%)")
+    logger.info(f" Thất bại: {len(df) - df['success'].sum()} ({(1-success_rate)*100:.1f}%)")
     
     # Select features
     X, y, feature_names = select_features(df)
@@ -317,17 +307,17 @@ def main():
     save_model(model, scaler, used_features, metrics, str(pkl_dir))
     
     # Summary
-    logger.info("\n" + "=" * 60)
+    logger.info("\n"+ "="* 60)
     logger.info("SUMMARY")
-    logger.info("=" * 60)
-    logger.info(f"✅ Model type: Pre-Release Prediction")
-    logger.info(f"✅ Features used: {len(used_features)}")
-    logger.info(f"✅ Accuracy: {metrics['accuracy']*100:.2f}%")
-    logger.info(f"✅ F1-Score: {metrics['f1_score']*100:.2f}%")
-    logger.info(f"✅ CV Mean: {metrics['cv_mean']*100:.2f}%")
-    logger.info(f"✅ Output directory: {output_dir}")
-    logger.info(f"✅ Log file: {log_file}")
-    logger.info("=" * 60)
+    logger.info("="* 60)
+    logger.info(f"Model type: Pre-Release Prediction")
+    logger.info(f"Features used: {len(used_features)}")
+    logger.info(f"Accuracy: {metrics['accuracy']*100:.2f}%")
+    logger.info(f"F1-Score: {metrics['f1_score']*100:.2f}%")
+    logger.info(f"CV Mean: {metrics['cv_mean']*100:.2f}%")
+    logger.info(f"Output directory: {output_dir}")
+    logger.info(f"Log file: {log_file}")
+    logger.info("="* 60)
     
     return model, scaler, metrics
 

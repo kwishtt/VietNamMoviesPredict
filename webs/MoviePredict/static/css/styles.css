@@ -635,6 +635,9 @@ body::before {
     color: var(--text-secondary);
     cursor: pointer;
     transition: all var(--transition-smooth);
+    pointer-events: auto !important;
+    user-select: none;
+    z-index: 10;
 }
 
 .genre-chip:hover {
