@@ -9,7 +9,7 @@
 
 ---
 
-## � Mục Lục
+## Mục Lục
 
 - [Giới Thiệu Dự Án](#-giới-thiệu-dự-án)
 - [Cấu Trúc Thư Mục](#-cấu-trúc-thư-mục)
