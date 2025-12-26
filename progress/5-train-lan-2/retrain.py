@@ -164,11 +164,11 @@ def train_model(X: pd.DataFrame, y: pd.Series) -> tuple:
         min_samples_leaf=2,
         random_state=42,
         n_jobs=-1,
-        class_weight='balanced'  # Xử lý class imbalance
+        class_weight='balanced' 
     )
     
     model.fit(X_train_scaled, y_train)
-    logger.info("Model đã train xong!")
+    logger.info("Done")
     
     # Predictions
     y_pred = model.predict(X_test_scaled)

@@ -278,6 +278,67 @@ RandomForestClassifier(
 ```
 - **class_weight='balanced'**: Rất quan trọng! Tự động tăng trọng số cho class thiểu số.
 
+#### 📖 **Giải thích chi tiết từng tham số:**
+
+| Tham số | Giá trị | Ý nghĩa |
+|---------|---------|---------|
+| `n_estimators` | 100 | Tạo 100 cây quyết định độc lập, sau đó "vote đa số" để đưa ra kết quả |
+| `max_depth` | 10 | Mỗi cây chỉ được phép có tối đa 10 level (từ root đến leaf) |
+| `min_samples_split` | 5 | Một nút cần ít nhất 5 samples mới được phép chia tiếp |
+| `min_samples_leaf` | 2 | Mỗi leaf node phải chứa ít nhất 2 samples |
+| `random_state` | 42 | Cố định random seed để kết quả lặp lại được |
+| `n_jobs` | -1 | Sử dụng tất cả CPU cores để train song song |
+| `class_weight` | 'balanced' | Tự động tính weight cho mỗi class theo tỷ lệ nghịch |
+
+#### 🔹 **`n_estimators=100` - Số lượng cây**
+- **Tại sao 100?**: Là baseline chuẩn, đủ để ensemble có hiệu quả. Dataset ~2000 samples → 100 cây là hợp lý.
+- **Nếu thay đổi**:
+  - `10-50`: Train nhanh hơn, nhưng dễ bị **high variance** (không ổn định)
+  - `200-500`: Accuracy tăng nhẹ (~0.5-1%), nhưng train **lâu gấp 2-5 lần**
+  - `1000+`: Hiệu quả tăng **không đáng kể** (diminishing returns)
+
+#### 🔹 **`max_depth=10` - Độ sâu tối đa** ⭐ QUAN TRỌNG
+- **Tại sao 10?**: Đây là **regularization quan trọng nhất** để chống overfitting!
+- **Nếu thay đổi**:
+  - `None` (default): Cây phát triển thoải mái → **OVERFITTING NẶNG** (train 100%, test thấp)
+  - `3-5`: **Underfitting** - cây quá nông, không học được pattern phức tạp
+  - `15-20`: Bắt đầu overfit, đặc biệt với dataset nhỏ
+
+#### 🔹 **`min_samples_split=5` - Số mẫu tối thiểu để tách nút**
+- **Tại sao 5?**: Ngăn cây tạo các nhánh quá nhỏ chỉ để fit vài samples → chống overfitting.
+- **Nếu thay đổi**:
+  - `2` (default): Cây chia quá chi tiết → overfit
+  - `50+`: **Underfitting** - bỏ qua nhiều pattern quan trọng
+
+#### 🔹 **`min_samples_leaf=2` - Số mẫu tối thiểu ở mỗi lá**
+- **Tại sao 2?**: Đảm bảo không có leaf chỉ chứa 1 sample (noise). Kết hợp với `min_samples_split=5` tạo **double protection** chống overfit.
+
+#### 🔹 **`random_state=42` - Seed cho reproducibility**
+- **Tại sao 42?**: Con số huyền thoại từ "The Hitchhiker's Guide to the Galaxy". Thực ra có thể chọn bất kỳ số nào, quan trọng là **cố định** để kết quả lặp lại được.
+
+#### 🔹 **`n_jobs=-1` - Sử dụng đa luồng**
+- **Tại sao -1?**: Random Forest train 100 cây độc lập → dễ dàng parallelized. Tận dụng toàn bộ CPU → train nhanh hơn nhiều lần.
+
+#### 🔹 **`class_weight='balanced'` - Cân bằng class** ⭐ RẤT QUAN TRỌNG!
+- **Công thức**: `weight = n_samples / (n_classes × n_samples_class_i)`
+- **Ví dụ**: Dataset có 1000 phim thất bại, 500 phim thành công:
+  - weight(thất bại) = 1500 / (2 × 1000) = **0.75**
+  - weight(thành công) = 1500 / (2 × 500) = **1.5**
+  - → Sai phim thành công bị phạt **GẤP ĐÔI**!
+- **Nếu không dùng**: Model sẽ **BIAS về class đa số** (thất bại) để maximize accuracy, dẫn đến Recall của class thiểu số rất thấp.
+
+#### 📊 **Tổng hợp: Mối quan hệ giữa các tham số**
+```
+                    OVERFITTING ←─────────────────→ UNDERFITTING
+                    
+n_estimators:       Thấp (10)                       Cao (500+) - ổn định hơn
+max_depth:          Cao (None, 50+)                 Thấp (3-5)
+min_samples_split:  Thấp (2)                        Cao (50+)
+min_samples_leaf:   Thấp (1)                        Cao (20+)
+```
+
+**Cấu hình hiện tại nằm ở SWEET SPOT**: `max_depth=10` + `min_samples_split=5` + `min_samples_leaf=2` → Cân bằng giữa học pattern và chống overfit.
+
 ### Q29: Em đã sử dụng kỹ thuật Cross-Validation như thế nào?
 - **Trả lời**:
     - Sử dụng **Stratified K-Fold** với K=5
